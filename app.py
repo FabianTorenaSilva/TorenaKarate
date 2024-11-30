@@ -1,5 +1,5 @@
-from flask import Flask, request, render_template_string, redirect, url_for
 import os
+from flask import Flask, request, render_template_string, redirect, url_for
 from dotenv import load_dotenv
 from llaves import LlaveManager
 from utils import generate_pdf_response
@@ -9,6 +9,11 @@ load_dotenv()
 
 app = Flask(__name__)
 llave_manager = LlaveManager()
+
+# Nueva ruta para verificar que Render está funcionando
+@app.route("/")
+def home():
+    return "¡Hola, Render está funcionando!"
 
 # Plantilla HTML para la entrada de datos
 form_template = """
@@ -77,7 +82,7 @@ form_template = """
 </html>
 """
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/registro', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         # Agregar peleador
@@ -95,11 +100,13 @@ def sortear():
 @app.route('/reset', methods=['GET'])
 def reset():
     llave_manager.peleas = []
-    return redirect('/')
+    return redirect('/registro')
 
 @app.route('/descargar_pdf', methods=['POST'])
 def descargar_pdf():
     return generate_pdf_response(llave_manager.peleas)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.getenv('PORT', 5000)))
+    # Render asigna dinámicamente el puerto a la variable de entorno PORT
+    port = int(os.environ.get("PORT", 5000))  # Usa 5000 como predeterminado para pruebas locales
+    app.run(host="0.0.0.0", port=port)
